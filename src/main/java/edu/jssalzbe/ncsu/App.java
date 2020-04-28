@@ -23,16 +23,13 @@ public class App {
         DiscordClientBuilder b = DiscordClientBuilder.create(pw);
         DiscordClient client = b.build();
 
-        client.getEventDispatcher().on(ReadyEvent.class).subscribe(event -> {
-            User self = event.getSelf();
-            System.out.println(String.format("Logged in as %s#%s", self.getUsername(), self.getDiscriminator()));
-        });
-
-        ReactionEmoji e = ReactionEmoji.unicode("❤️");
+        client.getEventDispatcher().on(ReadyEvent.class)
+                .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
 
         client.getEventDispatcher().on(MessageCreateEvent.class).map(MessageCreateEvent::getMessage)
-                .filter(message -> message.getAuthor().map(user -> !user.isBot()).orElse(false))
-                .flatMap(message -> message.addReaction(e)).subscribe();
+                .filter(msg -> msg.getContent().map(msg2 -> msg2.contains("!eggcookies")).orElse(false))
+                .flatMap(Message::getChannel).flatMap(channel -> channel.createMessage("🥚🍪")).subscribe();
+
         client.login().block();
     }
 }
